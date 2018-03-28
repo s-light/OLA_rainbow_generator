@@ -6,7 +6,7 @@
 import sys
 
 
-def request_userinput(message, handle_userinput):
+def request_userinput(message, handle_userinput=None):
     """Request userinput."""
     flag_run = True
     # handle different python versions:
@@ -33,7 +33,10 @@ def request_userinput(message, handle_userinput):
     else:
         try:
             if len(user_input) > 0:
-                flag_run = handle_userinput(user_input)
+                if handle_userinput:
+                    flag_run = handle_userinput(user_input)
+                else:
+                    flag_run = False
         except Exception as e:
             print("unknown error: {}".format(e))
             flag_run = False
