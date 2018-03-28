@@ -14,7 +14,7 @@ from __future__ import print_function
 from __future__ import division
 
 
-# import time
+import time
 import array
 import json
 
@@ -24,6 +24,7 @@ from olathreaded import OLAThread
 from exception_classes import FormatError
 
 from rainbow import get_rgb_from_rainbow
+import int_math
 
 
 ##########################################
@@ -42,8 +43,9 @@ class RainbowGenerator(OLAThread):
             'pixel_count': 50,
             'universe': 1,
             'pattern': {
-                'duration': 5000,
-                'current_position': 0,
+                # pattern loop duration in milli seconds
+                'duration': 10000,
+                # 'current_position': 0,
                 'running': True,
             },
             # 'repeat_count': 4,
@@ -98,6 +100,7 @@ class RainbowGenerator(OLAThread):
         # with this brightness we make sure that the value bounds are met
         self.brightness = self.config['generator']['brightness']
         self.universe = self.config['generator']['universe']
+        self.loop_start = time.time()
 
     def ola_connected(self):
         """Register update event callback and switch to running mode."""
@@ -125,11 +128,8 @@ class RainbowGenerator(OLAThread):
 
     def _update_brightness(self):
         """Update brightness settings in array."""
-        print("_update_brightness:")
         for ch_index in range(0, self._channel_count, 4):
-            print("\tch_index: {}".format(ch_index))
             self.data_output[ch_index] = self.brightness
-        print("done")
 
     ##########################################
 
@@ -263,20 +263,40 @@ class RainbowGenerator(OLAThread):
             self._generate_pattern
         )
 
-        running_state = self.config['generator']['pattern']['running']
-        if running_state:
+        if self.config['generator']['pattern']['running']:
             # update data
+            loop_duration = self.config['generator']['pattern']['duration']
+            current_duration = int((time.time() - self.loop_start) * 1000)
+            # print(
+            #     "loop_duration: {} \t"
+            #     "current_duration: {}".format(
+            #         loop_duration,
+            #         current_duration
+            #     )
+            # )
+            # handle current_duration
+            if current_duration >= loop_duration:
+                self.loop_start = time.time()
+                current_duration = 0
+                # print("loop restart")
 
-            offset_max = self.config['generator']['pattern']['duration']
-            offset = self.config['generator']['pattern']['current_position']
+            offset_8bit = int_math.map_bound_8bit(
+                current_duration,
+                loop_duration
+            )
             pixel_count = self.pixel_count
 
             for pixel_index in range(0, pixel_count):
+                # rgb = get_rgb_from_rainbow(
+                #     pixel_index,
+                #     pixel_count,
+                #     offset,
+                #     offset_max
+                # )
                 rgb = get_rgb_from_rainbow(
                     pixel_index,
                     pixel_count,
-                    offset,
-                    offset_max
+                    offset_8bit
                 )
                 ch_index = pixel_index * 4
                 # add offset for pixel-brightness value
@@ -291,8 +311,6 @@ class RainbowGenerator(OLAThread):
             # send frame
             self.dmx_send_frame(self.universe, self.data_output)
 
-            # handle current_position
-            # TODO
 
 ##########################################
 if __name__ == '__main__':

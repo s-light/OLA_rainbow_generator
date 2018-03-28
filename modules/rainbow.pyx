@@ -21,7 +21,7 @@ def get_rgb_from_rainbow(
     pixel,
     pixel_count,
     offset,
-    offset_max=255,
+    # offset_max=255,
     sat=255,
     val=255
 ):
@@ -29,8 +29,9 @@ def get_rgb_from_rainbow(
     # currently hue range is 0..255
     # so we have to map the input values to this range.
     pixel_8bit = int_math.map_bound_8bit(pixel, pixel_count)
-    offset_8bit = int_math.map_bound_8bit(offset, offset_max)
-    hue = pixel_8bit + offset_8bit
+    # offset_8bit = int_math.map_bound_8bit(offset, offset_max)
+    # hue = pixel_8bit + offset_8bit
+    hue = pixel_8bit + offset
     # handle wrap-around
     if hue > 255:
         hue = hue - 256
