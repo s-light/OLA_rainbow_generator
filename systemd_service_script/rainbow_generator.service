@@ -1,0 +1,31 @@
+# based on examples & infos found at
+# https://learn.adafruit.com/running-programs-automatically-on-your-tiny-computer/systemd-writing-and-enabling-a-service
+# https://medium.com/@johannes_gehrs/getting-started-with-systemd-on-debian-jessie-e024758ca63d
+# https://www.freedesktop.org/wiki/Software/systemd/NetworkTarget/
+# https://www.freedesktop.org/software/systemd/man/systemd.unit.html#Before=
+
+# copy to target with:
+#   sudo cp rainbow_generator.service /etc/systemd/system/
+# enable service
+#   sudo systemctl enable rainbow_generator.service
+# start
+#   sudo systemctl start rainbow_generator.service
+# check status
+#   sudo systemctl status rainbow_generator.service
+# disable service
+#   sudo systemctl disable rainbow_generator.service
+# remove service file:
+#   sudo rm /etc/systemd/system/rainbow_generator.service
+
+[Unit]
+Description=rainbow generator service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python2 /home/$USER/OLA_rainbow_generator/main.py
+StandardOutput=null
+# if process exits (with fail or success) restart it.
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
