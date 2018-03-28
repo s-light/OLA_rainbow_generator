@@ -13,13 +13,16 @@ from __future__ import print_function
 # https://docs.python.org/2.7/howto/pyporting.html#division
 from __future__ import division
 
+
 # import time
-# import array
+import array
 import json
 
 import configdict
 from olathreaded import OLAThread
 # from olathreaded import OLAThread_States
+from exception_classes import FormatError
+
 
 ##########################################
 # classes
@@ -28,12 +31,15 @@ from olathreaded import OLAThread
 class RainbowGenerator(OLAThread):
     """Class that extends on OLAThread and generates the pattern."""
 
+    channels_per_pixel = 4
+
     config_defaults = {
         'generator': {
-            'update_interval': 50,
+            'update_interval': 100,
             'pattern_duration': 5000,
-            'global_dimmer': 65535,
-            # 'pattern_running': True,
+            'brightness': 255,
+            'current_position': 0,
+            'pattern_running': True,
             # 'repeat_count': 4,
             # 'repeat_snake': True,
             # "color_channels": [
@@ -43,13 +49,6 @@ class RainbowGenerator(OLAThread):
             # ],
         },
         # 'patch': {
-        #     'channelcheck': {},
-        #     'rainbow': {},
-        #     'gradient': {},
-        #     'gradient_integer': {},
-        #     'strobe': {},
-        #     'static': {},
-        #     'colors_multiuniverse': {},
         # },
     }
 
@@ -73,16 +72,21 @@ class RainbowGenerator(OLAThread):
                 )
             ))
 
-        self.init_patterns()
+        self._init_pattern()
 
         if self.verbose:
             print("--> finished.")
             # print("config: {}".format(self.config))
 
-    def init_patterns(self):
+    def _init_pattern(self):
         """Load and initialize all available patterns."""
         if self.verbose:
-            print("init pattern.. TODO")
+            print("init pattern..")
+        # initialize properties
+        self.pixel_count = self.config['generator']['pixel_count']
+        # --> this also initializes the data_output array.
+        # with this brightness we make sure that the value bounds are met
+        self.brightness = self.config['generator']['brightness']
 
     def ola_connected(self):
         """Register update event callback and switch to running mode."""
@@ -96,6 +100,84 @@ class RainbowGenerator(OLAThread):
         # super(OLAThread, self).ola_connected()
         # explicit call
         OLAThread.ola_connected(self)
+
+    ##########################################
+
+    def _update_array(self):
+        """Update output array."""
+        # prepare temp array
+        self.data_output = array.array('B')
+        self.data_output.append(0)
+        # multiply so we have a array with total_channel_count zeros in it:
+        # this is much faster than a for loop!
+        self.data_output *= self._channel_count
+
+    def _update_brightness(self):
+        """Update brightness settings in array."""
+        for ch_index in range(0, self._channel_count, 4):
+            self.data_output[ch_index] = self.brightness
+
+    ##########################################
+
+    @property
+    def pixel_count(self):
+        """Pixel count."""
+        return self._pixel_count
+
+    @pixel_count.setter
+    def pixel_count(self, value):
+        try:
+            value = int(value)
+        except Exception:
+            raise FormatError(
+                "int",
+                "could not interpret input as integer",
+                value
+            )
+        else:
+            if (value >= 0) and (value <= 128):
+                self._pixel_count = value
+                self._channel_count = (
+                    self._pixel_count * self.channels_per_pixel
+                )
+                self.config['generator']['pixel_count'] = self._pixel_count
+                self._update_array()
+                self._update_brightness()
+            else:
+                raise FormatError(
+                    "int",
+                    "Format not valid. pixel_count must be > 0 and <= 128",
+                    value
+                )
+
+    @property
+    def brightness(self):
+        """Pixel count."""
+        return self._brightness
+
+    @brightness.setter
+    def brightness(self, value):
+        try:
+            value = int(value)
+        except Exception:
+            raise FormatError(
+                "int",
+                "could not interpret input as integer",
+                value
+            )
+        else:
+            if (value >= 0) and (value <= 255):
+                self._brightness = value
+                self.config['generator']['brightness'] = self._brightness
+                self._update_brightness()
+            else:
+                raise FormatError(
+                    "int",
+                    "Format not valid. brightness must be > 0 and <= 255",
+                    value
+                )
+
+    ##########################################
 
     # def _handle_repeat(self, channels):
     #     """Handle all pattern repeating things."""
@@ -192,14 +274,6 @@ class RainbowGenerator(OLAThread):
         running_state = self.config['generator']['pattern_running']
         if running_state:
             pass
-            # start_universe = self.config['generator']['universe']['output']
-            # universe_list = range(
-            #     start_universe,
-            #     start_universe +
-            #     self.config['generator']['universe']['count']
-            # )
-            # for universe in universe_list:
-            #     self._send_universe(pattern_name, universe)
 
 
 ##########################################

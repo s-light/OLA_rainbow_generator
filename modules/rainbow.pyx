@@ -5,12 +5,6 @@
 Rainbow.
 
 function should return rgb value for specific position of rainbow.
-the rainbow could be calculated in two ways.
-just use the python internal hsv2rgb from colorsys
-or the nicer variant would be to use the
-FastLED hsv2rgb_rainbow with visually balanced rainbow
-https://github.com/FastLED/FastLED/blob/master/hsv2rgb.h#L18
-https://github.com/FastLED/FastLED/blob/master/hsv2rgb.cpp#L278
 """
 
 from __future__ import print_function
@@ -20,15 +14,25 @@ from __future__ import division
 
 from hsv2rgb import hsv2rgb_rainbow_8bit
 
+import int_math
+
 
 def get_rgb_from_rainbow(
     pixel,
     pixel_count,
     offset,
-    offset_max
+    offset_max=255
 ):
-    """Calculate RGB value in Rainbow for specified position."""
-    hue = 0
+    """Calculate RGB value in Rainbow for specified position and offset."""
+    # currently hue range is 0..255
+    # so we have to map the input values to this range.
+    pixel_8bit = int_math.map_bound_8bit(pixel, pixel_count)
+    offset_8bit = int_math.map_bound_8bit(offset, offset_max)
+    hue = pixel_8bit + offset_8bit
+    # handle wrap-around
+    if hue > 255:
+        hue = hue - 256
+
     sat = 255
     val = 255
     return hsv2rgb_rainbow_8bit(hue, sat, val)
