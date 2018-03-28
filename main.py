@@ -22,7 +22,7 @@ from modules.configdict import ConfigDict
 from modules.userinput import request_userinput
 from modules.readline_history import setup_readline_history
 
-from modules.ola_pattern import RainbowGenerator
+from modules.rainbow_generator import RainbowGenerator
 
 # classes
 
