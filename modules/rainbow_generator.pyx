@@ -23,6 +23,8 @@ from olathreaded import OLAThread
 # from olathreaded import OLAThread_States
 from exception_classes import FormatError
 
+from rainbow import get_rgb_from_rainbow
+
 
 ##########################################
 # classes
@@ -36,10 +38,14 @@ class RainbowGenerator(OLAThread):
     config_defaults = {
         'generator': {
             'update_interval': 100,
-            'pattern_duration': 5000,
             'brightness': 255,
-            'current_position': 0,
-            'pattern_running': True,
+            'pixel_count': 50,
+            'universe': 1,
+            'pattern': {
+                'duration': 5000,
+                'current_position': 0,
+                'running': True,
+            },
             # 'repeat_count': 4,
             # 'repeat_snake': True,
             # "color_channels": [
@@ -72,6 +78,10 @@ class RainbowGenerator(OLAThread):
                 )
             ))
 
+        self._pixel_count = 50
+        self._brightness = 255
+        self._universe = 1
+
         self._init_pattern()
 
         if self.verbose:
@@ -87,6 +97,7 @@ class RainbowGenerator(OLAThread):
         # --> this also initializes the data_output array.
         # with this brightness we make sure that the value bounds are met
         self.brightness = self.config['generator']['brightness']
+        self.universe = self.config['generator']['universe']
 
     def ola_connected(self):
         """Register update event callback and switch to running mode."""
@@ -114,8 +125,11 @@ class RainbowGenerator(OLAThread):
 
     def _update_brightness(self):
         """Update brightness settings in array."""
+        print("_update_brightness:")
         for ch_index in range(0, self._channel_count, 4):
+            print("\tch_index: {}".format(ch_index))
             self.data_output[ch_index] = self.brightness
+        print("done")
 
     ##########################################
 
@@ -152,7 +166,7 @@ class RainbowGenerator(OLAThread):
 
     @property
     def brightness(self):
-        """Pixel count."""
+        """brightness."""
         return self._brightness
 
     @brightness.setter
@@ -174,6 +188,32 @@ class RainbowGenerator(OLAThread):
                 raise FormatError(
                     "int",
                     "Format not valid. brightness must be > 0 and <= 255",
+                    value
+                )
+
+    @property
+    def universe(self):
+        """Universe."""
+        return self._universe
+
+    @universe.setter
+    def universe(self, value):
+        try:
+            value = int(value)
+        except Exception:
+            raise FormatError(
+                "int",
+                "could not interpret input as integer",
+                value
+            )
+        else:
+            if (value >= 0) and (value <= 4000):
+                self._universe = value
+                self.config['generator']['universe'] = self._universe
+            else:
+                raise FormatError(
+                    "int",
+                    "Format not valid. universe must be > 0 and <= 4000",
                     value
                 )
 
@@ -214,54 +254,6 @@ class RainbowGenerator(OLAThread):
     #                 else:
     #                     channels.append(value)
     #     return channels
-    #
-    # def _apply_pixel_dimmer(self, channels):
-    #     """Apply the pixel dimmer for APA102."""
-    #     # print("")
-    #     global_dimmer_16bit = self.config['generator']['global_dimmer']
-    #     # print("global_dimmer_16bit", global_dimmer_16bit)
-    #     # 65535 = 255
-    #     #  gd   = gd8
-    #     # global_dimmer_8bit = 255 * global_dimmer_16bit / 65535
-    #     global_dimmer_8bit = pattern.map_16bit_to_8bit(global_dimmer_16bit)
-    #     # print("global_dimmer_8bit", global_dimmer_8bit)
-    #     # global_dimmer_norm = 1.0 * global_dimmer_16bit / 65535
-    #     # print("global_dimmer_norm", global_dimmer_norm)
-    #     # print("")
-    #     # print(len(channels))
-    #     # print(channels)
-    #     new_length = (len(channels) / 3) * 4
-    #     for i in range(0, new_length, 4):
-    #         channels.insert(i, global_dimmer_8bit)
-    #         # channels.insert(i + (i * 3), global_dimmer_8bit)
-    #     # print(len(channels))
-    #     # print(channels)
-    #     return channels
-
-    # def _send_universe(self, pattern_name, universe):
-    #     """Send one universe of data."""
-    #     if pattern_name:
-    #         if pattern_name in self.pattern:
-    #             # calculate channel values for pattern
-    #             channels = self.pattern[pattern_name].
-    #             _calculate_step(universe)
-    #             # print(42 * '*')
-    #             # temp_channel_len = len(channels)
-    #             # print('channels len', len(channels))
-    #             # print('channels', channels)
-    #             # channels_rep = self._handle_repeat(channels)
-    #             # print('channels_rep len', len(channels_rep))
-    #             # print('channels_rep', channels_rep)
-    #             # print("channels len: {:5>}; {:5>}".format(
-    #             #     temp_channel_len,
-    #             #     len(channels)
-    #             # ))
-    #             if self.config['generator']['use_pixel_dimming']:
-    #                 channels = self._apply_pixel_dimmer(channels)
-    #             else:
-    #                 channels = self._apply_global_dimmer(channels)
-    #             # send frame
-    #             self.dmx_send_frame(universe, channels)
 
     def _generate_pattern(self):
         """Generate pattern data."""
@@ -271,10 +263,36 @@ class RainbowGenerator(OLAThread):
             self._generate_pattern
         )
 
-        running_state = self.config['generator']['pattern_running']
+        running_state = self.config['generator']['pattern']['running']
         if running_state:
-            pass
+            # update data
 
+            offset_max = self.config['generator']['pattern']['duration']
+            offset = self.config['generator']['pattern']['current_position']
+            pixel_count = self.pixel_count
+
+            for pixel_index in range(0, pixel_count):
+                rgb = get_rgb_from_rainbow(
+                    pixel_index,
+                    pixel_count,
+                    offset,
+                    offset_max
+                )
+                ch_index = pixel_index * 4
+                # add offset for pixel-brightness value
+                ch_index += 1
+                self.data_output[ch_index + 0] = rgb[0]
+                self.data_output[ch_index + 1] = rgb[1]
+                self.data_output[ch_index + 2] = rgb[2]
+
+            # handle repeate
+            # TODO
+
+            # send frame
+            self.dmx_send_frame(self.universe, self.data_output)
+
+            # handle current_position
+            # TODO
 
 ##########################################
 if __name__ == '__main__':

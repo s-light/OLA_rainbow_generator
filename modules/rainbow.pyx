@@ -21,7 +21,9 @@ def get_rgb_from_rainbow(
     pixel,
     pixel_count,
     offset,
-    offset_max=255
+    offset_max=255,
+    sat=255,
+    val=255
 ):
     """Calculate RGB value in Rainbow for specified position and offset."""
     # currently hue range is 0..255
@@ -33,6 +35,4 @@ def get_rgb_from_rainbow(
     if hue > 255:
         hue = hue - 256
 
-    sat = 255
-    val = 255
     return hsv2rgb_rainbow_8bit(hue, sat, val)
