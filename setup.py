@@ -10,5 +10,5 @@ from distutils.core import setup
 from Cython.Build import cythonize
 
 setup(
-    ext_modules=cythonize("hsv2rgb.pyx", "rainbow.pyx")
+    ext_modules=cythonize("modules/*.pyx")
 )

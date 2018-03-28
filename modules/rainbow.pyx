@@ -28,8 +28,7 @@ def get_rgb_from_rainbow(
     offset_max
 ):
     """Calculate RGB value in Rainbow for specified position."""
-    pass
     hue = 0
-    sat = 0
-    val = 0
+    sat = 255
+    val = 255
     return hsv2rgb_rainbow_8bit(hue, sat, val)
