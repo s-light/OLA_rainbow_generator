@@ -18,11 +18,11 @@ import json
 # import signal
 import argparse
 
-from configdict import ConfigDict
-from userinput import request_userinput
-from readline_history import setup_readline_history
+from modules.configdict import ConfigDict
+from modules.userinput import request_userinput
+from modules.readline_history import setup_readline_history
 
-from ola_pattern import RainbowGenerator
+from modules.ola_pattern import RainbowGenerator
 
 # classes
 
@@ -46,7 +46,7 @@ class MainHandler(object):
     dimming and pattern speed.
     """
 
-    default_config = {
+    config_defaults = {
         'generator': {},
         'webinterface': {},
     }
@@ -68,7 +68,7 @@ class MainHandler(object):
         # signal.signal(signal.SIGINT, self._exit_helper)
         # signal.signal(signal.SIGTERM, self._exit_helper)
 
-        self.read_config(self.args.filename)
+        self.read_config()
 
         self.rainbow_generator = RainbowGenerator(self.config, self.verbose)
 
@@ -78,8 +78,13 @@ class MainHandler(object):
             print("--> init finished.")
             # print("config: {}".format(self.config))
 
-    def read_config(self, filename):
+    def read_config(self, filename=None):
         """Read and parse configuration."""
+        if not filename:
+            if "config" in self.args:
+                filename = self.args.config
+            else:
+                filename = self.filename_default
         # check for filename
         if not os.path.exists(filename):
             # print(
@@ -94,7 +99,7 @@ class MainHandler(object):
             filename = os.path.join(path_to_config, config_name)
 
         # read config file:
-        self.my_config = ConfigDict(self.default_config, filename)
+        self.my_config = ConfigDict(self.config_defaults, filename)
         # print("my_config.config: {}".format(self.my_config.config))
         self.config = self.my_config.config
         # print("config: {}".format(self.config))
@@ -115,7 +120,7 @@ class MainHandler(object):
 
     def init_cmdline(self):
         """Init commandline arguments handling."""
-        filename_default = "./config.json"
+        self.filename_default = "./config.json"
 
         parser = argparse.ArgumentParser(
             description="generate rainbow - output with olad"
@@ -125,10 +130,10 @@ class MainHandler(object):
             "--config",
             help="specify a location for the config file (defaults to {})".
             format(
-                filename_default
+                self.filename_default
             ),
             metavar='FILENAME',
-            default=filename_default
+            default=self.filename_default
         )
         parser.add_argument(
             "-i",
@@ -154,11 +159,12 @@ class MainHandler(object):
         """Run application."""
         self.rainbow_generator.start_ola()
 
+        self.flag_run = True
         if self.args.interactive:
             self._handle_interactive()
         else:
             # wait for user to hit key.
-            request_userinput("hit a key to stop this..")
+            request_userinput("hit Enter-Key or Ctrl+C to stop this..")
             self.flag_run = False
         print("\nstop.")
 
@@ -171,8 +177,12 @@ class MainHandler(object):
         print(__doc__)
         print(42 * '*')
         while self.flag_run:
-            message = "interactive mode. not implemented yet.."
-            self.flag_run = request_userinput(message)
+            message = (
+                "interactive mode.\n"
+                "not implemented yet.. \n"
+                "hit 'Ctrl + C' or 'q + Enter' to stop this..\n"
+            )
+            self.flag_run = request_userinput(message,)
 
 
 ##########################################

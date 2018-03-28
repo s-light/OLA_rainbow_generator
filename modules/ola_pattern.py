@@ -28,7 +28,7 @@ from olathreaded import OLAThread
 class RainbowGenerator(OLAThread):
     """Class that extends on OLAThread and generates the pattern."""
 
-    default_config = {
+    config_defaults = {
         'generator': {
             'update_interval': 50,
             'pattern_duration': 5000,
