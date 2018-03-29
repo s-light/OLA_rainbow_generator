@@ -6,6 +6,22 @@
 import sys
 
 
+def pre_handler(user_input, handle_userinput=None):
+    """Pre-handler."""
+    flag_run = False
+    try:
+        if len(user_input) > 0:
+            if handle_userinput:
+                flag_run = handle_userinput(user_input)
+            else:
+                flag_run = False
+    except Exception as e:
+        print("unknown error: {}".format(e))
+        flag_run = False
+        print("stop script.")
+    return flag_run
+
+
 def request_userinput(message, handle_userinput=None):
     """Request userinput."""
     flag_run = True
@@ -31,14 +47,5 @@ def request_userinput(message, handle_userinput=None):
         flag_run = False
         print("stop script.")
     else:
-        try:
-            if len(user_input) > 0:
-                if handle_userinput:
-                    flag_run = handle_userinput(user_input)
-                else:
-                    flag_run = False
-        except Exception as e:
-            print("unknown error: {}".format(e))
-            flag_run = False
-            print("stop script.")
+        flag_run = pre_handler(user_input, handle_userinput)
     return flag_run

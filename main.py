@@ -15,14 +15,17 @@ from __future__ import division
 import sys
 import os
 import json
+import time
 # import signal
 import argparse
 
 from modules.configdict import ConfigDict
-from modules.userinput import request_userinput
+# from modules.userinput import request_userinput
 from modules.readline_history import setup_readline_history
 
 from modules.rainbow_generator import RainbowGenerator
+from interface_interactive import InterfaceInteractive
+# from interface_web import InterfaceWeb
 
 # classes
 
@@ -73,8 +76,26 @@ class MainHandler(object):
         self.rainbow_generator = RainbowGenerator(self.config, self.verbose)
 
         setup_readline_history()
+        self.interface_interactive = InterfaceInteractive(
+            self.config,
+            self.verbose,
+            self
+        )
+        # self.interface_web = InterfaceWeb(
+        #     self.config,
+        #     self.verbose,
+        #     self.rainbow_generator
+        # )
 
         if self.verbose:
+            print("MainHandler config: {}".format(
+                json.dumps(
+                    self.config,
+                    sort_keys=True,
+                    indent=4,
+                    separators=(',', ': ')
+                )
+            ))
             print("--> init finished.")
             # print("config: {}".format(self.config))
 
@@ -103,16 +124,6 @@ class MainHandler(object):
         # print("my_config.config: {}".format(self.my_config.config))
         self.config = self.my_config.config
         # print("config: {}".format(self.config))
-
-        if self.verbose:
-            print("MainHandler config: {}".format(
-                json.dumps(
-                    self.config,
-                    sort_keys=True,
-                    indent=4,
-                    separators=(',', ': ')
-                )
-            ))
 
         # generate absolute path to config files
         path_to_config = os.path.dirname(filename)
@@ -161,16 +172,27 @@ class MainHandler(object):
 
     ##########################################
 
+    def not_interactive_waiting(self):
+        """Run application."""
+        # wait for user to hit key.
+        # request_userinput("hit Enter-Key or Ctrl+C to stop this..")
+        # this could be exchanged with an while loop just sleeping.
+        while self.flag_run:
+            try:
+                time.sleep(1)
+            except KeyboardInterrupt:
+                self.flag_run = False
+
     def run(self):
         """Run application."""
+        self.flag_run = True
         self.rainbow_generator.start_ola()
 
-        self.flag_run = True
         if self.args.interactive:
-            self._handle_interactive()
+            self.interface_interactive.run()
+            self.flag_run = False
         else:
-            # wait for user to hit key.
-            request_userinput("hit Enter-Key or Ctrl+C to stop this..")
+            self.not_interactive_waiting()
             self.flag_run = False
         print("\nstop.")
 
@@ -181,19 +203,6 @@ class MainHandler(object):
             if self.args.saveconfig:
                 self.my_config.write_to_file()
                 print("saved configutaion.")
-
-    def _handle_interactive(self):
-        """Handle interactive."""
-        print(42 * '*')
-        print(__doc__)
-        print(42 * '*')
-        while self.flag_run:
-            message = (
-                "interactive mode.\n"
-                "not implemented yet.. \n"
-                "hit 'Ctrl + C' or 'q + Enter' to stop this..\n"
-            )
-            self.flag_run = request_userinput(message,)
 
 
 ##########################################
