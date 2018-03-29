@@ -17,7 +17,11 @@ from __future__ import division
 import time
 import array
 # from cython cimport array
+<<<<<<< Updated upstream
 import json
+=======
+# import json
+>>>>>>> Stashed changes
 
 import configdict
 from olathreaded import OLAThread
@@ -71,15 +75,15 @@ class RainbowGenerator(OLAThread):
         self.config = config
         configdict.extend_deep(self.config, self.config_defaults.copy())
 
-        if self.verbose:
-            print("RainbowGenerator config: {}".format(
-                json.dumps(
-                    self.config,
-                    sort_keys=True,
-                    indent=4,
-                    separators=(',', ': ')
-                )
-            ))
+        # if self.verbose:
+        #     print("RainbowGenerator config: {}".format(
+        #         json.dumps(
+        #             self.config,
+        #             sort_keys=True,
+        #             indent=4,
+        #             separators=(',', ': ')
+        #         )
+        #     ))
 
         self._pixel_count = 50
         self._brightness = 255
@@ -125,6 +129,18 @@ class RainbowGenerator(OLAThread):
         # multiply so we have a array with total_channel_count zeros in it:
         # this is much faster than a for loop!
         self.data_output *= self._channel_count
+        # prepare snaked array
+        self.data_snaked = array.array('B')
+        self.data_snaked.append(0)
+        self.data_snaked *= self._channel_count
+
+    def _update_array_size(self):
+        """Update output array."""
+        # cython
+        # array.resize(self.data_output, self._channel_count)
+        # array.resize(self.data_snaked, self._channel_count)
+        # pure python
+        self._init_array()
 
     def _update_array_size(self):
         """Update output array."""
@@ -244,6 +260,7 @@ class RainbowGenerator(OLAThread):
         """Handle all pattern repeating things."""
         repeat_count = self.config['generator']['repeat_count']
         repeat_snake = self.config['generator']['repeat_snake']
+<<<<<<< Updated upstream
         # prepare temp array
         data_snaked = array.array('B')
         if repeat_snake:
@@ -252,13 +269,22 @@ class RainbowGenerator(OLAThread):
             data_snaked *= self._channel_count
             # generate data
             self.get_pixel_mirror_copy(self.data_output, data_snaked)
+=======
+        if repeat_snake:
+            # generate data
+            self.get_pixel_mirror_copy(self.data_output, self.data_snaked)
+>>>>>>> Stashed changes
         if repeat_count > 0:
             for repeate_index in range(1, repeat_count):
                 if repeat_snake:
                     if ((repeate_index % 2) > 0):
                         self.dmx_send_frame(
                             self.universe + repeate_index,
+<<<<<<< Updated upstream
                             data_snaked
+=======
+                            self.data_snaked
+>>>>>>> Stashed changes
                         )
                     else:
                         self.dmx_send_frame(
