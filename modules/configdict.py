@@ -18,13 +18,13 @@ simple package to read and write configs in dict format from/to file.
 
 import sys
 import os
-import time
+# import time
 import json
 try:
     # python3
     from configparser import ConfigParser
     # print("loaded python3 ConfigParser")
-except:
+except Exception:
     # python2
     from ConfigParser import ConfigParser
     # print("loaded python2 ConfigParser")
@@ -163,11 +163,11 @@ class ConfigDict():
         value = None
         try:
             value = json.loads(value_str)
-        except Exception as e:
+        except Exception:
             # print("value not valid json. ({})".format(e))
             try:
                 value = self._convert_string_to_None(value_str)
-            except Exception as e:
+            except Exception:
                 # print("value not None. ({})".format(e))
                 value = value_str
         return value
@@ -179,17 +179,17 @@ class ConfigDict():
         try:
             # try to read as int
             value = cp.getint(section, option)
-        except Exception as e:
+        except Exception:
             # print("value not a int. ({})".format(e))
             try:
                 # try to read as float
                 value = cp.getfloat(section, option)
-            except Exception as e:
+            except Exception:
                 # print("value not a float. ({})".format(e))
                 # try to read as int
                 try:
                     value = cp.getboolean(section, option)
-                except Exception as e:
+                except Exception:
                     # print("value not a boolean. ({})".format(e))
                     # read as string
                     value = cp.get(section, option)
@@ -238,7 +238,6 @@ class ConfigDict():
         # extend config with defaults
         self.config = config_temp
         extend_deep(self.config, self.config_defaults.copy())
-
 
     def _write_to_json_file(self, filename, config):
         with open(filename, 'w') as f:
@@ -311,6 +310,7 @@ class ConfigDict():
             indent=4,
             separators=(',', ': ')
         )
+
 
 ##########################################
 if __name__ == '__main__':
