@@ -136,6 +136,12 @@ class MainHandler(object):
             default=self.filename_default
         )
         parser.add_argument(
+            "-s",
+            "--saveconfig",
+            help="save config on exit",
+            action="store_true"
+        )
+        parser.add_argument(
             "-i",
             "--interactive",
             help="run in interactive mode",
@@ -170,6 +176,11 @@ class MainHandler(object):
 
         # blocks untill thread has joined.
         self.rainbow_generator.stop_ola()
+
+        if "saveconfig" in self.args:
+            if self.args.saveconfig:
+                self.my_config.write_to_file()
+                print("saved configutaion.")
 
     def _handle_interactive(self):
         """Handle interactive."""
