@@ -16,6 +16,7 @@ from __future__ import division
 
 import time
 import array
+# from cython cimport array
 import json
 
 import configdict
@@ -48,8 +49,8 @@ class RainbowGenerator(OLAThread):
                 # 'current_position': 0,
                 'running': True,
             },
-            # 'repeat_count': 4,
-            # 'repeat_snake': True,
+            'repeat_count': 4,
+            'repeat_snake': True,
             # "color_channels": [
             #     "red",
             #     "green",
@@ -106,7 +107,7 @@ class RainbowGenerator(OLAThread):
         """Register update event callback and switch to running mode."""
         self.wrapper.AddEvent(
             self.config['generator']['update_interval'],
-            self._generate_pattern
+            self._update
         )
         # python3 syntax
         # super().ola_connected()
@@ -117,14 +118,20 @@ class RainbowGenerator(OLAThread):
 
     ##########################################
 
-    def _update_array(self):
-        """Update output array."""
-        # prepare temp array
+    def _init_array(self):
+        """Init output array."""
         self.data_output = array.array('B')
         self.data_output.append(0)
         # multiply so we have a array with total_channel_count zeros in it:
         # this is much faster than a for loop!
         self.data_output *= self._channel_count
+
+    def _update_array_size(self):
+        """Update output array."""
+        # cython
+        # array.resize(self.data_output, self._channel_count)
+        # pure python
+        self._init_array()
 
     def _update_brightness(self):
         """Update brightness settings in array."""
@@ -155,7 +162,7 @@ class RainbowGenerator(OLAThread):
                     self._pixel_count * self.channels_per_pixel
                 )
                 self.config['generator']['pixel_count'] = self._pixel_count
-                self._update_array()
+                self._update_array_size()
                 self._update_brightness()
             else:
                 raise FormatError(
@@ -219,97 +226,111 @@ class RainbowGenerator(OLAThread):
 
     ##########################################
 
-    # def _handle_repeat(self, channels):
-    #     """Handle all pattern repeating things."""
-    #     # this does not work. we have to use the pixel information.
-    #     # otherwiese color-order will get mixed up..
-    #     # pixel_count = self.config['generator']['pixel_count']
-    #     repeat_count = self.config['generator']['repeat_count']
-    #     repeat_snake = self.config['generator']['repeat_snake']
-    #     channels_count = len(channels)
-    #     # print("pixel_count:", pixel_count)
-    #     # print("repeat_snake:", repeat_snake)
-    #     # print("repeat_count:", repeat_count)
-    #
-    #     if repeat_count > 0:
-    #         for repeate_index in range(1, repeat_count):
-    #             # print("repeate_index:", repeate_index)
-    #             # normal direction
-    #             # = snake forward
-    #             pixel_range = range(0, channels_count)
-    #             # if repeat_snake and ((repeate_index % 2) > 0):
-    #             if repeat_snake:
-    #                 # print("repeat_snake:", repeat_snake)
-    #                 if ((repeate_index % 2) > 0):
-    #                     # print("(repeate_index % 2):", (repeate_index % 2))
-    #                     # snake back
-    #                     pixel_range = range(channels_count - 1, -1, -1)
-    #             # print("pixel_range:", pixel_range)
-    #             for channel_index in pixel_range:
-    #                 # print("append:", channel_index)
-    #                 try:
-    #                     value = channels[channel_index]
-    #                 except Exception as e:
-    #                     print('error:', e)
-    #                 else:
-    #                     channels.append(value)
-    #     return channels
+    def get_pixel_mirror_copy(self, data_input, data_snaked):
+        """Create a mirrored copy of data_input (respecting pixels)."""
+        for pixel_index in range(0, self.pixel_count):
+            ch_index = pixel_index * 4
+            # data_input[ch_index + 0] == brightness
+            # data_input[ch_index + 1] == red
+            # data_input[ch_index + 2] == green
+            # data_input[ch_index + 3] == blue
+            ch_index_snake = ((self.pixel_count - 1) - pixel_index) * 4
+            data_snaked[ch_index_snake + 0] = data_input[ch_index + 0]
+            data_snaked[ch_index_snake + 1] = data_input[ch_index + 1]
+            data_snaked[ch_index_snake + 2] = data_input[ch_index + 2]
+            data_snaked[ch_index_snake + 3] = data_input[ch_index + 3]
+
+    def _handle_repeat(self):
+        """Handle all pattern repeating things."""
+        repeat_count = self.config['generator']['repeat_count']
+        repeat_snake = self.config['generator']['repeat_snake']
+        # prepare temp array
+        data_snaked = array.array('B')
+        if repeat_snake:
+            # prepare
+            data_snaked.append(0)
+            data_snaked *= self._channel_count
+            # generate data
+            self.get_pixel_mirror_copy(self.data_output, data_snaked)
+        if repeat_count > 0:
+            for repeate_index in range(1, repeat_count):
+                if repeat_snake:
+                    if ((repeate_index % 2) > 0):
+                        self.dmx_send_frame(
+                            self.universe + repeate_index,
+                            data_snaked
+                        )
+                    else:
+                        self.dmx_send_frame(
+                            self.universe + repeate_index,
+                            self.data_output
+                        )
+                else:
+                    self.dmx_send_frame(
+                        self.universe + repeate_index,
+                        self.data_output
+                    )
+        pass
 
     def _generate_pattern(self):
+        """Generate pattern data."""
+        # update data
+        loop_duration = self.config['generator']['pattern']['duration']
+        current_duration = int((time.time() - self.loop_start) * 1000)
+        # print(
+        #     "loop_duration: {} \t"
+        #     "current_duration: {}".format(
+        #         loop_duration,
+        #         current_duration
+        #     )
+        # )
+        # handle current_duration
+        if current_duration >= loop_duration:
+            self.loop_start = time.time()
+            current_duration = 0
+            # print("loop restart")
+
+        offset_8bit = int_math.map_bound_8bit(
+            current_duration,
+            loop_duration
+        )
+        pixel_count = self.pixel_count
+
+        for pixel_index in range(0, pixel_count):
+            # rgb = get_rgb_from_rainbow(
+            #     pixel_index,
+            #     pixel_count,
+            #     offset,
+            #     offset_max
+            # )
+            rgb = get_rgb_from_rainbow(
+                pixel_index,
+                pixel_count,
+                offset_8bit
+            )
+            ch_index = pixel_index * 4
+            # add offset for pixel-brightness value
+            ch_index += 1
+            self.data_output[ch_index + 0] = rgb[0]
+            self.data_output[ch_index + 1] = rgb[1]
+            self.data_output[ch_index + 2] = rgb[2]
+
+    def _update(self):
         """Generate pattern data."""
         # register new event (for correct timing as first thing.)
         self.wrapper.AddEvent(
             self.config['generator']['update_interval'],
-            self._generate_pattern
+            self._update
         )
 
         if self.config['generator']['pattern']['running']:
-            # update data
-            loop_duration = self.config['generator']['pattern']['duration']
-            current_duration = int((time.time() - self.loop_start) * 1000)
-            # print(
-            #     "loop_duration: {} \t"
-            #     "current_duration: {}".format(
-            #         loop_duration,
-            #         current_duration
-            #     )
-            # )
-            # handle current_duration
-            if current_duration >= loop_duration:
-                self.loop_start = time.time()
-                current_duration = 0
-                # print("loop restart")
+            self._generate_pattern()
 
-            offset_8bit = int_math.map_bound_8bit(
-                current_duration,
-                loop_duration
-            )
-            pixel_count = self.pixel_count
-
-            for pixel_index in range(0, pixel_count):
-                # rgb = get_rgb_from_rainbow(
-                #     pixel_index,
-                #     pixel_count,
-                #     offset,
-                #     offset_max
-                # )
-                rgb = get_rgb_from_rainbow(
-                    pixel_index,
-                    pixel_count,
-                    offset_8bit
-                )
-                ch_index = pixel_index * 4
-                # add offset for pixel-brightness value
-                ch_index += 1
-                self.data_output[ch_index + 0] = rgb[0]
-                self.data_output[ch_index + 1] = rgb[1]
-                self.data_output[ch_index + 2] = rgb[2]
+            # send data for first universe
+            self.dmx_send_frame(self.universe, self.data_output)
 
             # handle repeate
-            # TODO
-
-            # send frame
-            self.dmx_send_frame(self.universe, self.data_output)
+            self._handle_repeat()
 
 
 ##########################################
