@@ -81,7 +81,7 @@ class OLAThread(threading.Thread):
     def run(self):
         """Run state engine in threading."""
         print("run")
-        print("self.state: {}".format(self.state))
+        # print("self.state: {}".format(self.state))
         while self.state is not OLAThread_States.standby:
             if self.state is OLAThread_States.waiting:
                 # print("state - waiting")
@@ -91,7 +91,7 @@ class OLAThread(threading.Thread):
             elif self.state is OLAThread_States.running:
                 self.ola_wrapper_run()
             # elif self.state is OLAThread_States.stopping:
-            #     pass
+            #   pass
             # elif self.state is OLAThread_States.starting:
             #     pass
 
@@ -113,9 +113,9 @@ class OLAThread(threading.Thread):
 
     def ola_waiting_for_connection(self):
         """Connect to ola."""
-        print("waiting for olad....")
         self.flag_connected = False
         self.flag_wait_for_ola = True
+        print("waiting for olad....")
         while (not self.flag_connected) & self.flag_wait_for_ola:
             try:
                 # print("get wrapper")
@@ -123,8 +123,14 @@ class OLAThread(threading.Thread):
             except OLADNotRunningException:
                 time.sleep(0.5)
             else:
-                self.flag_connected = True
-                self.state = OLAThread_States.connected
+                # check again if self.state has changed..
+                # this could happen if directly after a start a stop is done.
+                if self.state is OLAThread_States.waiting:
+                    self.flag_connected = True
+                    self.state = OLAThread_States.connected
+                # else:
+                #     # self.state = OLAThread_States.connected
+                #     print("state changed.. reevaluate..")
 
         if self.flag_connected:
             self.flag_wait_for_ola = False
@@ -183,6 +189,7 @@ class OLAThread(threading.Thread):
         if self.state == OLAThread_States.standby:
             self.state = OLAThread_States.waiting
             self.start()
+            # time.sleep(1)
 
     def stop_ola(self):
         """Stop ola wrapper."""
