@@ -17,11 +17,7 @@ from __future__ import division
 import time
 import array
 # from cython cimport array
-<<<<<<< Updated upstream
-import json
-=======
 # import json
->>>>>>> Stashed changes
 
 import configdict
 from olathreaded import OLAThread
@@ -260,31 +256,16 @@ class RainbowGenerator(OLAThread):
         """Handle all pattern repeating things."""
         repeat_count = self.config['generator']['repeat_count']
         repeat_snake = self.config['generator']['repeat_snake']
-<<<<<<< Updated upstream
-        # prepare temp array
-        data_snaked = array.array('B')
-        if repeat_snake:
-            # prepare
-            data_snaked.append(0)
-            data_snaked *= self._channel_count
-            # generate data
-            self.get_pixel_mirror_copy(self.data_output, data_snaked)
-=======
         if repeat_snake:
             # generate data
             self.get_pixel_mirror_copy(self.data_output, self.data_snaked)
->>>>>>> Stashed changes
         if repeat_count > 0:
             for repeate_index in range(1, repeat_count):
                 if repeat_snake:
                     if ((repeate_index % 2) > 0):
                         self.dmx_send_frame(
                             self.universe + repeate_index,
-<<<<<<< Updated upstream
-                            data_snaked
-=======
                             self.data_snaked
->>>>>>> Stashed changes
                         )
                     else:
                         self.dmx_send_frame(
