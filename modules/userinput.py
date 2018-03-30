@@ -4,11 +4,12 @@
 """Wrapper for User Input."""
 
 import sys
+import traceback
 
 
 def pre_handler(user_input, handle_userinput=None):
     """Pre-handler."""
-    flag_run = False
+    flag_run = True
     try:
         if len(user_input) > 0:
             if handle_userinput:
@@ -17,6 +18,7 @@ def pre_handler(user_input, handle_userinput=None):
                 flag_run = False
     except Exception as e:
         print("unknown error: {}".format(e))
+        traceback.print_exc()
         flag_run = False
         print("stop script.")
     return flag_run
