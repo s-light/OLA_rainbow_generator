@@ -161,8 +161,9 @@ class MainHandler(object):
         parser.add_argument(
             "-v",
             "--verbose",
-            help="show advanced log information",
-            action="store_true"
+            help="show advanced log information"
+            "(specify multiple times for more details)",
+            action="count"
         )
         self.args = parser.parse_args()
 

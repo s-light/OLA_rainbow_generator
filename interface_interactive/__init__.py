@@ -74,7 +74,7 @@ class InterfaceInteractive(object):
         for entry_name in self.menu_entry_order:
             if entry_name in self.menu_entries:
                 entry = self.menu_entries[entry_name]
-                message += self.generate_message_for_entry(entry_name, entry)
+                message += self.generate_message_for_entry(entry)
         message += 42 * "*" + "\n"
         return message
 
@@ -84,7 +84,9 @@ class InterfaceInteractive(object):
         flag_run = True
         # print("user_input: ", user_input)
         entry_name, menu_entry = self.find_entry_from_shortcode(user_input)
-        # print("entry_name: {} menu_entry: {}".format(entry_name, menu_entry))
+        if self.verbose >= 2:
+            print("entry_name: {} menu_entry: {}".format(
+                entry_name, menu_entry))
         if menu_entry:
             # print(" --> handle_entry_userinput")
             flag_run = self.handle_entry_userinput(user_input, menu_entry)
@@ -110,7 +112,7 @@ class InterfaceInteractive(object):
         self._menu_entries_longest_name_length = longest_name_length
         self._menu_entries_longest_shortcode_length = longest_shortcode_length
 
-    def generate_message_for_entry(self, entry_name, menu_entry):
+    def generate_message_for_entry(self, menu_entry):
         """Handle userinput."""
         message = ""
         # check if we generate a messagae at all..
@@ -155,7 +157,7 @@ class InterfaceInteractive(object):
                 pass
             # render message
             message = format_string.format(
-                name=entry_name,
+                name=menu_entry["name"],
                 shortcode=menu_entry["shortcode"],
                 info=menu_entry["info"],
                 parameter_value=parameter_value,
@@ -197,13 +199,23 @@ class InterfaceInteractive(object):
         parser_type = menu_entry["parser_type"]
         parser_function = None
         if parser_type in self.parser_types:
+            if self.verbose >= 2:
+                print("parser_type: {}".format(parser_type))
             parser_function = self.parser_types[parser_type]
             if parser_function:
-                raw_value = parser_function(user_input)
-                if raw_value:
+                if self.verbose >= 2:
+                    print("call parser function ({})".format(parser_function))
+                raw_value = parser_function(self, user_input)
+                if self.verbose >= 2:
+                    print("raw_value: '{}'".format(raw_value))
+                if raw_value is not None:
                     value = self.check_input(raw_value, menu_entry)
+                    if self.verbose >= 2:
+                        print("value: '{}'".format(value))
                     if value:
                         self.menu_entry_set_parameter(value, menu_entry)
+                elif self.verbose:
+                    print("no value found.")
 
     def callback_func_for_entry(self, user_input, menu_entry):
         """Callback Function for entry."""
@@ -354,27 +366,32 @@ class InterfaceInteractive(object):
     # menu config
 
     #  example entry
-    # the descriptiv name of the entry
-    # "update_interval": {
-    #     entry chooser shortcode
-    #     "shortcode":"ui",
-    #     a description
-    #     "info": "set update interval",
-    #     the parameter on self that should be set (dot notation)
-    #     "parameter": "parent.rainbow_generator.update_interval",
-    #     "parameter_unit": "ms",
-    #     format parser
-    #     "parser_type": "int",
-    #     bound information for value
-    #     "bounds": {
-    #         "mode": "restrict | fail"
-    #         "min": 0,
-    #         "max": 10000,
-    #     },
-    # },
+    menu_entries_example = {
+        "update_interval": {
+            # the descriptiv name of the entry
+            "name": "update_interval",
+            # entry chooser shortcode
+            "shortcode": "ui",
+            # a description
+            "info": "set update interval",
+            # the parameter on self that should be set (dot notation)
+            "parameter": "parent.rainbow_generator.update_interval",
+            # unit for parameter
+            "parameter_unit": "ms",
+            # format parser
+            "parser_type": "int",
+            # bound information for value
+            "bounds": {
+                "mode": "restrict | fail",
+                "min": 0,
+                "max": 10000,
+            },
+        },
+    }
 
     menu_entries = {
         "update_interval": {
+            "name": "update_interval",
             "shortcode": "ui",
             "info": "set update interval",
             # "info_extra": " ({update_frequency}Hz)",
@@ -388,6 +405,7 @@ class InterfaceInteractive(object):
             },
         },
         "universe": {
+            "name": "universe",
             "shortcode": "uo",
             "info": "set universe",
             "parameter": "parent.rainbow_generator.universe",
@@ -399,6 +417,7 @@ class InterfaceInteractive(object):
             },
         },
         "pattern_duration": {
+            "name": "pattern_duration",
             "shortcode": "pd",
             "info": "set pattern duration",
             "parameter": "parent.rainbow_generator.pattern_duration",
@@ -411,6 +430,7 @@ class InterfaceInteractive(object):
             },
         },
         "brightness": {
+            "name": "brightness",
             "shortcode": "b",
             "info": "set brightness",
             "parameter": "parent.rainbow_generator.brightness",
@@ -422,16 +442,19 @@ class InterfaceInteractive(object):
             },
         },
         "quit": {
+            "name": "quit",
             "shortcode": "q",
             "info": "Ctrl+C or 'q' to stop script",
             "callback_func": menu_entry_cbf__quit,
         },
         "save_config": {
+            "name": "save_config",
             "shortcode": "sc",
             "info": "save config",
             "callback_func": menu_entry_cbf__save_config,
         },
         "-": {
+            "name": "",
             "info": "",
         },
     }
