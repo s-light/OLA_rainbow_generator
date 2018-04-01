@@ -141,6 +141,8 @@ class InterfaceInteractive(object):
             )
             if "parameter" in menu_entry:
                 format_parameter += "{parameter_value}"
+                # if self.verbose >= 2:
+                #     print(42 * "~")
                 parameter_value = self.walk_parameter_and_get_or_set(
                     menu_entry["parameter"],
                     self
@@ -222,7 +224,7 @@ class InterfaceInteractive(object):
         flag_run = True
         callback_func = menu_entry["callback_func"]
         if callback_func:
-            flag_run = callback_func(user_input)
+            flag_run = callback_func(self, user_input)
         return flag_run
 
     def check_input_message(self, name, message, message_value):
@@ -258,13 +260,15 @@ class InterfaceInteractive(object):
         result_value = value
         if "bounds" in menu_entry:
             bounds = menu_entry["bounds"]
+            restrict_flag = False
             if "mode" in bounds:
-                restrict_flag = False
                 if bounds["mode"] is "restrict":
                     restrict_flag = True
             message = ""
             message_value = None
             if "min" in bounds:
+                # if self.verbose >= 2:
+                #     print("check min: '{}'".format(bounds["min"]))
                 if value <= bounds["min"]:
                     message = "minimum"
                     if restrict_flag:
@@ -273,7 +277,9 @@ class InterfaceInteractive(object):
                     else:
                         result_value = None
             if "max" in bounds:
-                if value <= bounds["max"]:
+                # if self.verbose >= 2:
+                #     print("check max: '{}'".format(bounds["max"]))
+                if value >= bounds["max"]:
                     message = "maximum"
                     if restrict_flag:
                         result_value = bounds["max"]
@@ -304,6 +310,18 @@ class InterfaceInteractive(object):
         # "parameter": "parent.rainbow_generator.update_interval",
         # function calls itself if a nother level of dot notation is found.
         result = None
+        # if self.verbose >= 2:
+        #     print(
+        #         "walk_parameter_and_get_or_set\n"
+        #         "  param_string: '{}'\n"
+        #         "  reference: '{}'\n"
+        #         "  value: '{}'\n"
+        #         "".format(
+        #             param_string,
+        #             reference,
+        #             value
+        #         )
+        #     )
         if '.' not in param_string:
             if value:
                 setattr(reference, param_string, value)
@@ -317,14 +335,21 @@ class InterfaceInteractive(object):
                 sub_ref,
                 value
             )
+        # if self.verbose >= 2:
+        #     print("  result: '{}'".format(result))
         return result
 
     def menu_entry_set_parameter(self, value, menu_entry):
         """Set Parameter from menu entry with new value."""
         # "parameter": "parent.rainbow_generator.update_interval",
-        if "parameter" in self.parser_types:
-            param_string = self.parser_types.parameter
-            self.walk_parameter_and_set(param_string, self, value)
+        # if self.verbose >= 2:
+        #     print(42 * "°")
+        if "parameter" in menu_entry:
+            self.walk_parameter_and_get_or_set(
+                menu_entry["parameter"],
+                self,
+                value
+            )
 
     ##########################################
     # parser
