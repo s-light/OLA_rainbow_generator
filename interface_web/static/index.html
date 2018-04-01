@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="author" content="OLA Rainbow Generator">
+
+    <link rel="shortcut icon" href="favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+    <link rel="shortcut icon" type="image/svg" href="favicon.svg" />
+    <link rel="stylesheet" href="css/main.css" media="screen" title="no title" charset="utf-8">
+    <script src="js/main.js" charset="utf-8"></script>
+    <title>Rainbow Generator</title>
+</head>
+<body onload="update_information()">
+    <header>
+        <h1>Rainbow Generator</h1>
+    </header>
+    <div class="content" >
+        <div class="subset">
+
+
+            <input type="range"
+                min="0"
+                max="255"
+                step="1"
+                value="255"
+            >
+            <input type="range"
+                min="0"
+                max="255"
+                step="1"
+                value="255"
+            >
+
+            <!-- <a href="simpleconfig.html">
+                <button
+                    type="button"
+                    name="go_to_simpleconfig"
+                >
+                    simpleconfig
+                </button>
+            </a> -->
+        </div>
+        <!-- <div class="subset">
+            <button
+                type="button"
+                name="update_information"
+                onclick="update_information()"
+            >
+                update information
+            </button>
+            <pre class="device_information" id="device_information">...</pre>
+        </div> -->
+        <footer>
+            <a href="license.html">license</a>
+
+            <a href="https://github.com/s-light/OLA_rainbow_generator">project on github</a>
+        </footer>
+</body>
+</html>
