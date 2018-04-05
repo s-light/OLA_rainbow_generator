@@ -1,5 +1,10 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    margin-bottom: 3em;
     background-color: rgb(255, 255, 255);
     background-position: center;
     background-attachment: fixed;
@@ -8,16 +13,32 @@ body {
         hsla(122, 100%, 70%, 1),
         hsla(240, 90%, 40%, 1)
     );
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-content: stretch;
+    align-items: stretch;
+}
+
+header, section, footer {
+    order: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
+    align-self: auto;
 }
 
 header {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    justify-content: space-between;
+    justify-content: center;
     align-content: center;
     align-items: center;
 }
+
 header h1 {
     order: 0;
     flex: 0 1 auto;
@@ -37,28 +58,31 @@ header h1 {
     border-radius: 0.5em;
     margin: 0.5em;
     box-shadow: 0 0 1em 0 rgba(0, 0, 0, 0.6);
-    /* background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent; */ */
-    /* offset-x | offset-y | blur-radius | color */
-    /* text-shadow: 5px 1px 2px rgba(0, 0, 0, 0.9);  */
 }
 
 
-
-div.content {
-    margin: 1em;
+section {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-content: stretch;
+    align-items: center;
 }
 
-div.subset {
-    margin: 1em 0;
+.stretch {
+    flex-grow: 1 !important;
+}
+
+section div {
+    order: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
+    align-self: auto;
 }
 
 footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
     background-color: rgba(0, 0, 0, 0);
     background-image: linear-gradient(
         to bottom,
@@ -88,6 +112,35 @@ footer > a {
     align-self: auto;
 }
 
+
+noscript {
+    position: fixed;
+    display: block;
+    /*width: 200px;
+    width: 100vw;
+    height: 200px;
+    height: 100vh;*/
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-color: rgb(255, 150, 0);
+    border-style: dotted;
+    border-width: 1em;
+    text-shadow:	        0 0 2px rgb(000, 000, 000),
+                            0 0 3px rgb(000, 000, 000),
+                            0 0 6px rgb(000, 000, 000);
+    font-size: 2em;
+    color: rgb(255, 0, 0);
+    background-color: rgba(0, 0, 0, 0.7);
+    background: linear-gradient(to right, red , yellow);
+    padding: 1em;
+}
+
+
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* content things */
 .fixed_text {
     width: 60em;
     font-family: monospace;
@@ -114,30 +167,97 @@ footer > a {
     border: none;
 }
 
-noscript {
-    position: fixed;
-    display: block;
-    /*width: 200px;
-    width: 100vw;
-    height: 200px;
-    height: 100vh;*/
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-color: rgb(255, 150, 0);
-    border-style: dotted;
-    border-width: 1em;
-    text-shadow:	        0 0 2px rgb(000, 000, 000),
-                            0 0 3px rgb(000, 000, 000),
-                            0 0 6px rgb(000, 000, 000);
-    font-size: 2em;
-    color: rgb(255, 0, 0);
-    background-color: rgba(0, 0, 0, 0.7);
-    background: linear-gradient(to right, red , yellow);
-    padding: 1em;
-}
-
 button {
     min-width: 18em;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* inputs */
+
+label {
+    display: block;
+}
+
+.vertical_slider {
+
+}
+
+/* .vertical_slider > * {
+    order: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
+    align-self: auto;
+    position: relative;
+} */
+
+.vertical_slider_helper {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-content: stretch;
+    align-items: center;
+
+    position: relative;
+}
+
+.vertical_slider input[type="range"] {
+    order: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
+    align-self: auto;
+
+    position: relative;
+
+    width: 50vh;
+    height: 2em;
+
+    /* margin: 0; */
+    /* transform-origin: 75px 75px; */
+    transform: rotate(-90deg);
+}
+
+/* input[type='range'] {
+	-webkit-appearance: none;
+	vertical-align: middle;
+    border-radius: 5px;
+	box-shadow: inset 0 0 5px #333;
+	background-color: #999;
+} */
+input[type="range"]::-moz-range-track {
+	-moz-appearance: none;
+	border-radius: 0.5em;
+	box-shadow: 0 0 5px #333;
+	background-color: transparent;
+	height: 1em;
+}
+
+input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+	border-radius: 1.0em;
+	background-color: #FFF;
+	box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 10px rgba(0,0,0,0.9);
+	border: 0 solid white;
+	height: 6em;
+	width: 3.0em;
+}
+input[type='range']::-moz-range-thumb {
+	-moz-appearance: none;
+	border-radius: 1.0em;
+	background-color: #FFF;
+	box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 10px rgba(0,0,0,0.9);
+	border: 0 solid white;
+	height: 6em;
+	width: 3.0em;
+}
+
+input[type="number"] {
+	height: 1.5em;
+	background-color: transparent;
+	border: solid 1px;
+	border-radius: 0.5em;
+	padding: 0.5em;
+	color: black;
 }
