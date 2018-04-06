@@ -25,7 +25,7 @@ from modules.readline_history import setup_readline_history
 
 from modules.rainbow_generator import RainbowGenerator
 from interface_interactive import InterfaceInteractive
-# from interface_web import InterfaceWeb
+from interface_web import InterfaceWeb
 
 # classes
 
@@ -81,11 +81,11 @@ class MainHandler(object):
             self.verbose,
             self
         )
-        # self.interface_web = InterfaceWeb(
-        #     self.config,
-        #     self.verbose,
-        #     self.rainbow_generator
-        # )
+        self.interface_web = InterfaceWeb(
+            self.config,
+            self.verbose,
+            self
+        )
 
         if self.verbose:
             print("MainHandler config: {}".format(
@@ -188,6 +188,7 @@ class MainHandler(object):
         """Run application."""
         self.flag_run = True
         self.rainbow_generator.start_ola()
+        self.interface_web.start()
 
         if self.args.interactive:
             self.interface_interactive.run()
@@ -199,6 +200,7 @@ class MainHandler(object):
 
         # blocks untill thread has joined.
         self.rainbow_generator.stop_ola()
+        self.interface_web.stop()
 
         if "saveconfig" in self.args:
             if self.args.saveconfig:
