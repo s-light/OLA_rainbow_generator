@@ -1,7 +1,13 @@
 
+function remap(value, in_min, in_max, out_min, out_max) {
+  return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 function update_brightness() {
     let slider_brightness = document.getElementById('brightness');
-    send_brightness(slider_brightness.value);
+    const value_5bit = slider_brightness.value;
+    const value_8bit = remap(value_5bit, 0, 31, 0, 255);
+    send_brightness(value_8bit);
 }
 
 function update_pattern_duration() {
