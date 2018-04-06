@@ -62,6 +62,8 @@ class InterfaceWeb(object):
         super(InterfaceWeb, self).__init__()
         self.verbose = verbose
         self.parent = parent
+        # print('self.verbose', self.verbose)
+        # print('self.parent', self.parent)
         # setup termination and interrupt handling:
         # signal.signal(signal.SIGINT, self._exit_helper)
         # signal.signal(signal.SIGTERM, self._exit_helper)

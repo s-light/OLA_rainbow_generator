@@ -24,7 +24,7 @@ function send_PUT_request(url, content, onready_function) {
 // high-level helpers
 
 function send_brightness(value) {
-    console.log('send new brightness value.');
+    // console.log('send new brightness value.');
     var send_url = 'api/brightness';
     var send_content = {
         'value': value,
@@ -52,15 +52,16 @@ function get_brightness() {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
                 var response = JSON.parse(xhttp.responseText);
                 console.info('pattern/brightness', response);
-                document.getElementById('brightness').value =
-                    response.value;
+                let el = document.getElementById('brightness');
+                console.info('el brightness', el);
+                el.value = response;
             }
         }
     );
 }
 
 function send_pattern_duration(value) {
-    console.log('send new pattern_duration value.');
+    // console.log('send new pattern_duration value.');
     var send_url = 'api/pattern_duration';
     var send_content = {
         'value': value,
@@ -88,8 +89,9 @@ function get_pattern_duration() {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
                 var response = JSON.parse(xhttp.responseText);
                 console.info('pattern/duration', response);
-                document.getElementById('pattern_duration').value =
-                    response.value;
+                let el = document.getElementById('pattern_duration');
+                console.info('el pattern_duration', el);
+                el.value = response;
             }
         }
     );

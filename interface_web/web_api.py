@@ -72,9 +72,10 @@ class APIHandler(object):
         object.__init__(self)
         self._verbose = verbose
         self._parent = parent
-
-        self.brightness = Brightness(self._parent)
-        self.pattern_duration = PatternDuration(self._parent)
+        # print('self._verbose', self._verbose)
+        # print('self._parent', self._parent)
+        self.brightness = Brightness(self._verbose, self._parent)
+        self.pattern_duration = PatternDuration(self._verbose, self._parent)
 
     # @cherrypy.expose
     def GET(self):
