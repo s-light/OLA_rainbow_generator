@@ -22,7 +22,7 @@ Description=rainbow generator service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python2 /home/$USER/OLA_rainbow_generator/main.py -c=/home/light/OLA_rainbow_generator/config.json
+ExecStart=/usr/bin/python2 /home/light/OLA_rainbow_generator/main.py -c=/home/light/OLA_rainbow_generator/config.json
 StandardOutput=null
 # if process exits (with fail or success) restart it.
 Restart=always
