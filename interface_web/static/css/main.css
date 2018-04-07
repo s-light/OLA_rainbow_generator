@@ -10,6 +10,12 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
+
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }
 
 body {
@@ -23,6 +29,7 @@ body {
     );
 
     font-family: "dana_library_hand",  sans-serif;
+    font-size:  16px;
 
     min-height: 450px;
     min-width: 350px;
@@ -34,6 +41,8 @@ body {
     align-content: stretch;
     align-items: stretch;
 }
+
+/* check media rules at end of document */
 
 header, section, footer {
     order: 0;
@@ -284,4 +293,21 @@ input[type='range']::-moz-range-thumb {
 	border: 0 solid white;
 	height: 4em;
 	width: 2.0em;
+}
+
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* media rules */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+/* special media querry to fix sizing for Samsung Galaxy S2 */
+@media screen
+  and (device-width: 320px)
+  and (orientation: portrait) {
+    body {
+      font-size:  40px;
+    }
+    input[type="range"] {
+        width: 60vh;
+    }
 }
