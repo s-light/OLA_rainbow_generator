@@ -24,8 +24,8 @@ body {
     background-attachment: fixed;
     background-image: linear-gradient(
         to bottom,
-        hsla(122, 100%, 70%, 1),
-        hsla(240, 90%, 40%, 1)
+        hsla(122, 100%, 60%, 1),
+        hsla(240, 90%, 50%, 1)
     );
 
     font-family: "dana_library_hand",  sans-serif;
@@ -37,7 +37,7 @@ body {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
-    justify-content: center;
+    justify-content: start;
     align-content: stretch;
     align-items: stretch;
 }
@@ -47,7 +47,7 @@ body {
 header, section, footer {
     order: 0;
     flex-grow: 0;
-    flex-shrink: 0;
+    flex-shrink: 1;
     flex-basis: auto;
     align-self: auto;
 }
@@ -96,7 +96,7 @@ section {
     flex-grow: 1 !important;
 }
 
-section div {
+section > * {
     order: 0;
     flex-grow: 0;
     flex-shrink: 0;
