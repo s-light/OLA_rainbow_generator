@@ -1,3 +1,11 @@
+
+
+@import "../font/DanaLibraryHand_v1.3__webfontkit/stylesheet.css";
+/*
+	dana_library_hand
+    in regular, bold, italic, bolditalic
+*/
+
 html, body {
     height: 100%;
     margin: 0;
@@ -13,6 +21,11 @@ body {
         hsla(122, 100%, 70%, 1),
         hsla(240, 90%, 40%, 1)
     );
+
+    font-family: "dana_library_hand",  sans-serif;
+
+    min-height: 450px;
+    min-width: 350px;
 
     display: flex;
     flex-direction: column;
@@ -87,12 +100,16 @@ footer {
     background-image: linear-gradient(
         to bottom,
         rgba(0, 0, 0, 0),
+        rgba(0, 0, 0, 0) 0.1em,
         rgba(0, 0, 0, 0.8) 1.5em,
         rgba(0, 0, 0, 1)
     );
     color: white;
     /*height: 1.5em;*/
-    padding: 1.5em 1em 0.5em;
+    margin-top: 0.5em;
+    padding: 1.1em 1em 0.2em;
+
+    font-size: 0.8em;
 
     display: flex;
     flex-direction: row;
@@ -174,12 +191,37 @@ button {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* inputs */
 
+
 label {
     display: block;
 }
 
-.vertical_slider {
+input {
+    background-color: transparent;
+	border: none 0;
+	border-radius: 0.5em;
+    box-shadow: 0 0 0.1em rgba(0, 0, 0, 0.7), 0 0 1em rgba(0, 0, 0, 0.5);
+	color: black;
+    font-family: inherit;
+    font-weight: 900;
+    font-size: 1.5em;
+}
 
+input[type="range"] {
+    width: 50vh;
+    height: 2em;
+    border: none 0;
+    box-shadow: none;
+}
+
+input[type="number"] {
+	height: 1.2em;
+    width: 4em;
+	padding: 0 0.5em;
+}
+
+.vertical_slider{
+    min-height: 50vh;
 }
 
 /* .vertical_slider > * {
@@ -210,26 +252,17 @@ label {
     align-self: auto;
 
     position: relative;
-
-    width: 50vh;
-    height: 2em;
-
-    /* margin: 0; */
-    /* transform-origin: 75px 75px; */
     transform: rotate(-90deg);
 }
 
 /* input[type='range'] {
 	-webkit-appearance: none;
 	vertical-align: middle;
-    border-radius: 5px;
-	box-shadow: inset 0 0 5px #333;
-	background-color: #999;
 } */
 input[type="range"]::-moz-range-track {
 	-moz-appearance: none;
 	border-radius: 0.5em;
-	box-shadow: 0 0 5px #333;
+	box-shadow: 0 0 0.1em rgba(0, 0, 0, 0.7), 0 0 1em rgba(0, 0, 0, 0.5);
 	background-color: transparent;
 	height: 1em;
 }
@@ -237,27 +270,18 @@ input[type="range"]::-moz-range-track {
 input[type='range']::-webkit-slider-thumb {
     -webkit-appearance: none !important;
 	border-radius: 1.0em;
-	background-color: #FFF;
+	background-color: rgba(255, 255, 255, 0.8);
 	box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 10px rgba(0,0,0,0.9);
 	border: 0 solid white;
-	height: 6em;
-	width: 3.0em;
+	height: 4em;
+	width: 2.0em;
 }
 input[type='range']::-moz-range-thumb {
 	-moz-appearance: none;
 	border-radius: 1.0em;
-	background-color: #FFF;
+	background-color: rgba(255, 255, 255, 0.8);
 	box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 10px rgba(0,0,0,0.9);
 	border: 0 solid white;
-	height: 6em;
-	width: 3.0em;
-}
-
-input[type="number"] {
-	height: 1.5em;
-	background-color: transparent;
-	border: solid 1px;
-	border-radius: 0.5em;
-	padding: 0.5em;
-	color: black;
+	height: 4em;
+	width: 2.0em;
 }
